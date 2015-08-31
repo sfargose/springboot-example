@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:batch="http://www.springframework.org/schema/batch"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:task="http://www.springframework.org/schema/task" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/batch
+	http://www.springframework.org/schema/batch/spring-batch-2.2.xsd
+	http://www.springframework.org/schema/beans 
+	http://www.springframework.org/schema/beans/spring-beans-3.2.xsd
+	http://www.springframework.org/schema/context
+	http://www.springframework.org/schema/context/spring-context-3.2.xsd
+	http://www.springframework.org/schema/task
+        http://www.springframework.org/schema/task/spring-task-3.2.xsd
+	">
+
+	<context:component-scan base-package="com.military.content.articles.batch" />
+
+	<bean class="org.springframework.batch.core.scope.StepScope" />
+
+	<batch:job id="importNewsCredArticlesJob">
+		<batch:step id="createTempDirectories" next="downloadAndImport">
+			<batch:tasklet ref="createTempDirectoriesTasklet" />
+		</batch:step>
+		<batch:step id="downloadAndImport" next="cleanupTempDirectories">
+			<batch:tasklet>
+				<batch:chunk reader="xmlItemReader" writer="fatwireAssetWriter"
+					processor="processor" commit-interval="10">
+				</batch:chunk>
+			</batch:tasklet>
+		</batch:step>
+		<batch:step id="cleanupTempDirectories">
+			<batch:tasklet ref="cleanupTempDirectoriesTasklet" />
+		</batch:step>
+	</batch:job>
+
+	<bean id="xmlItemReader" class="org.springframework.batch.item.xml.StaxEventItemReader">
+		<property name="resource" value="${news.cred.collection.url}" />
+		<property name="fragmentRootElementName" value="content" />
+		<property name="unmarshaller" ref="jaxbMarshallerBean" />
+	</bean>
+
+	<bean id="processor"
+		class="org.springframework.batch.item.support.CompositeItemProcessor">
+		<property name="delegates">
+			<list>
+				<ref bean="newscredDuplicateArticleFilter" />
+				<ref bean="newscredFatwireConverter" />
+			</list>
+		</property>
+	</bean>
+
+</beans>

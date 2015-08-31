@@ -1,0 +1,82 @@
+group = 'com.military'
+version = '0.1.0'
+
+apply plugin: 'java'
+apply plugin: 'eclipse'
+apply plugin: 'idea'
+apply plugin: 'militarybuild'
+apply plugin: 'spring-boot'
+
+
+archivesBaseName = 'articles-import'
+description = 'articles-import'
+
+military {
+    manifestTitle = 'Articles Import app'
+}
+
+jar {
+    baseName = 'articles-import'
+}
+
+dependencies {
+
+	compile("org.springframework.boot:spring-boot-starter-web")
+    compile("org.springframework.boot:spring-boot-starter-actuator")
+    compile("org.springframework.boot:spring-boot-starter-thymeleaf")
+    compile("org.springframework.boot:spring-boot-starter-batch")
+    
+    compile 'org.springframework:spring-oxm:3.0.1.RELEASE'
+	compile 'org.springframework:spring-test:3.0.1.RELEASE'
+	
+    compile 'com.military:spring-config-etd:1.0.0-51'
+    compile 'net.floatingsun:jetcd:0.3.1'
+    
+    compile 'io.dropwizard.metrics:metrics-httpclient:3.1.0'
+	compile 'io.dropwizard.metrics:metrics-core:3.1.0'
+	compile 'com.military:metrics-statsd:1.0.0-4'
+	    
+    compile("fatwire:cs:7.6.2")
+    compile("fatwire:cs-core:7.6.2")
+    compile 'commons-codec:commons-codec:1.4'
+    compile 'commons-httpclient:commons-httpclient:3.1'
+    compile 'commons-lang:commons-lang:2.4'
+    compile 'commons-logging:commons-logging:1.1.1'
+    compile 'commons-io:commons-io:2.4'
+    compile 'commons-dbcp:commons-dbcp:1.2.2'
+    
+    compile 'fatwire:wem-sso-api:1.1.3'
+    compile 'fatwire:MSXML:7.6.2'
+    compile 'com.google.code.gson:gson:2.2.4'
+	compile 'aopalliance:aopalliance:1.0'
+	
+    compile 'org.oracle:ojdbc6:11.2.0.4'
+    compile 'com.google.code.json:json:1.0'
+    
+    
+    testCompile 'junit:junit:4.10'   
+    
+}
+
+
+buildscript {
+  repositories {
+      maven {
+          url 'http://miltest.artifactoryonline.com/miltest/plugins-releases/'
+          credentials {
+            username = "${artifactory_user}"
+            password = "${artifactory_password}"
+          }             
+      }
+  }
+  dependencies {
+      classpath("org.springframework.boot:spring-boot-gradle-plugin:1.1.8.RELEASE")
+      classpath 'com.military.gradle:militarybuild:+'
+  }
+}
+
+artifactory {
+  // could make the repo/url be a property
+  clientConfig.info.setBuildUrl "https://circleci.com/gh/milcom/aboutus/${build_number}"
+  clientConfig.info.setBuildNumber build_number
+}

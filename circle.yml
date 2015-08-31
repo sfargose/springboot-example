@@ -1,0 +1,24 @@
+general:
+  artifacts:
+    - "build/reports/tests"
+
+machine:
+  java:
+    version: oraclejdk8
+
+dependencies:
+  override:
+    - ./gradlew dependencies -Pbuild_number=${CIRCLE_BUILD_NUM}
+
+test:
+  override:
+    - ./gradlew build -Pbuild_number=${CIRCLE_BUILD_NUM}
+  post:
+    - mkdir -p $CIRCLE_TEST_REPORTS/junit/
+    - find . -type f -regex ".*/build/test-results/.*xml" -exec cp {} $CIRCLE_TEST_REPORTS/junit/ \;
+
+deployment:
+  production:
+    branch: master
+    commands:
+      - ./gradlew bootRepackage artifactoryPublish -Pbuild_number=${CIRCLE_BUILD_NUM}
